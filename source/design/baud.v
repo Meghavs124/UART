@@ -1,33 +1,22 @@
-`timescale 1ns / 1ns
-
-module baud #(parameter clk_freq=5000000,baud_rate=2400)(
-	input sys_clk,
-	input sys_rst,
-	output reg baud_op_clk);
-	
-	integer count;
-	
-	parameter count1= (clk_freq)/(16*baud_rate);
-	
-	always @(posedge sys_clk or negedge sys_rst)
-     	begin
-			if(!sys_rst) begin
-			baud_op_clk<=0;
-			count<=0;
-			end
-			
-			else if (count==(count1-1))
-			begin
-			baud_op_clk<=~baud_op_clk;
-			count<=0;
-			end
-			
-			else
-			begin
-			baud_op_clk<=0;
-			count<=count+1;
-			end
-			
-		end
+module baud_rate #(parameter freq=50000000,baudr=2400)(
+    input sys_clk,
+    input sys_rst,
+    output reg uart_clk
+    );
+    integer endcount=(freq/(baudr*16*2));
+    reg [30:0] count=0;
+    always @(posedge sys_clk or negedge sys_rst)
+        begin   
+            if(!sys_rst) 
+				begin 
+					uart_clk <=0;
+					count<=0; 
+				end
+            else if(count == endcount-1) 
+				begin 
+					uart_clk <= ~uart_clk;
+					count<=0;end
+            else 
+				count <= count+1;
+        end       
 endmodule
-
