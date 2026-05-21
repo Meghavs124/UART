@@ -25,7 +25,7 @@ module uart_tx #(parameter width = 8)(
             index            <= 0;
             latched_data     <= 0;
             uart_xmit_data_h <= 1;
-            xmit_done_h      <= 0;
+            xmit_done_h      <= 1;
             xmit_active      <= 0;
         end
         else begin
