@@ -1,3 +1,4 @@
+
 module uart_rx #(parameter width = 8)(
     input                   sys_rst,
     input                   baud_op_clk,
@@ -58,12 +59,22 @@ module uart_rx #(parameter width = 8)(
                 rec_data_h <= 0;
 
             
-            if (ct == stop && count == 15 && rx2 == 1'b1)
+           /* if (ct == stop && count == 15 && rx2 == 1'b1)
                 rec_ready <= 1;
             else
                 rec_ready <= 0;
 
+            rec_busy <= (nt != idle);*/
+              if (ct == stop && count == 15 && rx2 != 1'b1)
+                rec_data_h <= 0;
+
+            // rec_busy: high whenever not idle
             rec_busy <= (nt != idle);
+
+            // rec_ready: inverse of busy
+            // HIGH when idle (not receiving), LOW when busy (receiving)
+            // Stays HIGH until next start bit pulls it low
+            rec_ready <= (nt == idle);
         end
     end
 
@@ -95,4 +106,4 @@ module uart_rx #(parameter width = 8)(
             default: nt = idle;
         endcase
     end
-endmodule
+endmodule 
