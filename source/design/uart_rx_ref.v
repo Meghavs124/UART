@@ -37,7 +37,6 @@ module uart_rx_ref #(parameter width = 8)(
             shift     = 0;
             rec_data_h = 0;
 
-            // Mid-point of start bit  verify still low
             repeat(8) @(posedge baud_op_clk);
             if (uart_rec_data_h !== 1'b0) begin
                 rec_busy = 0;
@@ -47,7 +46,7 @@ module uart_rx_ref #(parameter width = 8)(
             // Wait out remainder of start bit
             repeat(8) @(posedge baud_op_clk);
 
-            // Sample each data bit at mid-bit, mirror DUT right-shift
+            // Sample each data bit at mid-bit
             for (i = 0; i < width; i = i + 1) begin
                 repeat(8) @(posedge baud_op_clk);
                 rx2_sampled = uart_rec_data_h;
@@ -63,6 +62,7 @@ module uart_rx_ref #(parameter width = 8)(
             if (uart_rec_data_h !== 1'b1) begin
                 $display("[uart_rx_ref] FRAMING ERROR at time %0t", $time);
                 rec_data_h = 0;
+                
                 // Wait out rest of stop bit then clear busy
                 repeat(8) @(posedge baud_op_clk);
                 rec_busy  = 0;
@@ -71,13 +71,9 @@ module uart_rx_ref #(parameter width = 8)(
                 disable rx_frame;
             end
 
-            // Valid stop bit:
-            // FIX: clear busy FIRST, then assert ready
-            // This matches DUT where ready pulses after busy drops
-            repeat(8) @(posedge baud_op_clk);  // wait out rest of stop bit
-            rec_busy  = 0;                      // busy clears first
+            repeat(8) @(posedge baud_op_clk);  
+            rec_busy  = 0;                    
 
-            // Now pulse ready for exactly 1 baud tick
             rec_ready = 1;
             @(posedge baud_op_clk);
             rec_ready = 0;
