@@ -70,10 +70,6 @@ module uart_rx #(parameter width = 8)(
 
             // rec_busy: high whenever not idle
             rec_busy <= (nt != idle);
-
-            // rec_ready: inverse of busy
-            // HIGH when idle (not receiving), LOW when busy (receiving)
-            // Stays HIGH until next start bit pulls it low
             rec_ready <= (nt == idle);
         end
     end
