@@ -18,9 +18,7 @@ module uart_tx_ref #(parameter width = 8)(
         busy             = 0;
         latched_data     = 0;
     end
-
-    // Block 1: latch data and set busy when xmit_h seen and not busy
-    // Also clear xmit_done_h when new transmission starts
+    
     always @(posedge baud_op_clk or negedge sys_rst) begin
         if (!sys_rst) begin
             latched_data <= 0;
@@ -31,12 +29,12 @@ module uart_tx_ref #(parameter width = 8)(
         else if (xmit_h && !busy) begin
             latched_data <= xmit_data_h;
             busy         <= 1;
-            xmit_done_h  <= 0;   // clear done at start of new frame
+            xmit_done_h  <= 0;  
             xmit_active  <= 1;
         end
     end
 
-    // Block 2: drive serial line when busy goes high
+
     always @(posedge busy or negedge sys_rst) begin : tx_send
         if (!sys_rst) begin
             uart_xmit_data_h <= 1;
@@ -63,13 +61,12 @@ module uart_tx_ref #(parameter width = 8)(
             repeat(15) @(posedge baud_op_clk);
 
             // Assert done and clear active/busy
-            // xmit_done_h stays HIGH (not a pulse) until next frame starts
+            
             @(posedge baud_op_clk);
             xmit_done_h <= 1;
             xmit_active <= 0;
             busy        <= 0;
-            // do NOT clear xmit_done_h here  it stays high
-            // it gets cleared in Block 1 when next xmit_h arrives
+            
         end
     end
 
